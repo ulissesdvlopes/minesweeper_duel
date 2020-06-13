@@ -17,7 +17,9 @@ defmodule MinesweeperDuelWeb.Router do
   scope "/", MinesweeperDuelWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    get "/", MinesweeperController, :index
+    post "/game-ms", MinesweeperController, :create
+    live "/game-ms/:id", PageLive, :index
   end
 
   # Other scopes may use custom stacks.
