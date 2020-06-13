@@ -7,6 +7,7 @@ defmodule MinesweeperDuel.Mineswepper do
   alias MinesweeperDuel.Repo
 
   alias MinesweeperDuel.Mineswepper.Game
+  alias MinesweeperDuel.Mineswepper.Cell
 
   @doc """
   Returns the list of games.
@@ -35,7 +36,27 @@ defmodule MinesweeperDuel.Mineswepper do
       ** (Ecto.NoResultsError)
 
   """
-  def get_game!(id), do: Repo.get!(Game, id)
+  def get_game!(id) do 
+    Repo.get!(Game, id)
+  end
+
+  defp sort_mines(map, turn \\ 0) do
+    case turn do
+      51 -> map
+      _ -> add_mine(map, turn)
+    end
+  end
+
+  defp add_mine(map, turn) do
+    row = Enum.random(0..15)
+    cell = Enum.random(0..15)
+
+    if(!Map.has_key?(map, {row, cell})) do
+      sort(Map.put(map, {row, cell}, true), turn + 1)
+    else
+      sort(map, turn)
+    end
+  end
 
   @doc """
   Creates a game.
@@ -50,9 +71,15 @@ defmodule MinesweeperDuel.Mineswepper do
 
   """
   def create_game(attrs \\ %{}) do
-    %Game{}
-    |> Game.changeset(attrs)
-    |> Repo.insert()
+    {:ok, game} = 
+      %Game{}
+      |> Game.changeset(attrs)
+      |> Repo.insert()
+    
+    mine_positions = sort_mines(%{})
+
+    create_cell(game.id, mine_positions)
+    
   end
 
   @doc """
@@ -102,7 +129,6 @@ defmodule MinesweeperDuel.Mineswepper do
     Game.changeset(game, attrs)
   end
 
-  alias MinesweeperDuel.Mineswepper.Cell
 
   @doc """
   Returns the list of cells.
@@ -133,22 +159,57 @@ defmodule MinesweeperDuel.Mineswepper do
   """
   def get_cell!(id), do: Repo.get!(Cell, id)
 
+  defp get_adjacents(row, col) do
+    for x <- Range.new(row - 1, row + 1),
+      y <- Range.new(col - 1, col + 1),
+      cell_exists?(x, y) && !(x == row && y == col),
+      do: {x, y}
+  end
+
+  defp cell_exists?(row,col) do
+    (row >= 0 && col >= 0 && row <= 15 && col <= 15)
+  end
+
+  defp get_mines_around(mines_map, row, col) do
+    Enum.reduce(get_adjacents(row, col), 0, fn {row, col}, acc ->
+      if(Map.has_key?(mines_map, {row, col})) do
+        acc + 1
+      else
+        acc
+      end
+    end)
+  end
+
   @doc """
   Creates a cell.
 
   ## Examples
 
-      iex> create_cell(%{field: value})
+      iex> create_cell(game_id)
       {:ok, %Cell{}}
 
-      iex> create_cell(%{field: bad_value})
+      iex> create_cell(null)
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_cell(attrs \\ %{}) do
-    %Cell{}
-    |> Cell.changeset(attrs)
-    |> Repo.insert()
+  defp create_cell(game_id, mine_positions, row \\ 0, col \\ 0) do
+    {:ok, cell} =
+      %Cell{}
+      |> Cell.changeset(%{
+        game_id: game_id,
+        has_mine: Map.has_key?(mine_positions, {row, col}),
+        row: row, 
+        col: col,
+        mines_around: get_mines_around(mine_positions, row, col)
+      })
+      |> Cell.insert()
+
+    if(row < 15) do
+      create_cell(game_id, mine_positions, row + 1, col)
+    end
+    if(row == 15 && col < 15) do
+      create_cell(game_id, mine_positions, 0, col + 1)
+    end
   end
 
   @doc """
