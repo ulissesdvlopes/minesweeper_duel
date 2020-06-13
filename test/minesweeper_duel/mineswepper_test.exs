@@ -69,4 +69,71 @@ defmodule MinesweeperDuel.MineswepperTest do
       assert %Ecto.Changeset{} = Mineswepper.change_game(game)
     end
   end
+
+  describe "cells" do
+    alias MinesweeperDuel.Mineswepper.Cell
+
+    @valid_attrs %{col: 42, has_mine: true, mines_around: 42, revealed: true, row: 42}
+    @update_attrs %{col: 43, has_mine: false, mines_around: 43, revealed: false, row: 43}
+    @invalid_attrs %{col: nil, has_mine: nil, mines_around: nil, revealed: nil, row: nil}
+
+    def cell_fixture(attrs \\ %{}) do
+      {:ok, cell} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Mineswepper.create_cell()
+
+      cell
+    end
+
+    test "list_cells/0 returns all cells" do
+      cell = cell_fixture()
+      assert Mineswepper.list_cells() == [cell]
+    end
+
+    test "get_cell!/1 returns the cell with given id" do
+      cell = cell_fixture()
+      assert Mineswepper.get_cell!(cell.id) == cell
+    end
+
+    test "create_cell/1 with valid data creates a cell" do
+      assert {:ok, %Cell{} = cell} = Mineswepper.create_cell(@valid_attrs)
+      assert cell.col == 42
+      assert cell.has_mine == true
+      assert cell.mines_around == 42
+      assert cell.revealed == true
+      assert cell.row == 42
+    end
+
+    test "create_cell/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Mineswepper.create_cell(@invalid_attrs)
+    end
+
+    test "update_cell/2 with valid data updates the cell" do
+      cell = cell_fixture()
+      assert {:ok, %Cell{} = cell} = Mineswepper.update_cell(cell, @update_attrs)
+      assert cell.col == 43
+      assert cell.has_mine == false
+      assert cell.mines_around == 43
+      assert cell.revealed == false
+      assert cell.row == 43
+    end
+
+    test "update_cell/2 with invalid data returns error changeset" do
+      cell = cell_fixture()
+      assert {:error, %Ecto.Changeset{}} = Mineswepper.update_cell(cell, @invalid_attrs)
+      assert cell == Mineswepper.get_cell!(cell.id)
+    end
+
+    test "delete_cell/1 deletes the cell" do
+      cell = cell_fixture()
+      assert {:ok, %Cell{}} = Mineswepper.delete_cell(cell)
+      assert_raise Ecto.NoResultsError, fn -> Mineswepper.get_cell!(cell.id) end
+    end
+
+    test "change_cell/1 returns a cell changeset" do
+      cell = cell_fixture()
+      assert %Ecto.Changeset{} = Mineswepper.change_cell(cell)
+    end
+  end
 end

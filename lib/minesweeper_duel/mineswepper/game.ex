@@ -2,12 +2,15 @@ defmodule MinesweeperDuel.Mineswepper.Game do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias MinesweeperDuel.Mineswepper.Cell
+
   schema "games" do
     field :guest, :string
     field :guest_points, :integer
     field :host, :string
     field :host_ponts, :integer
     field :turn, :string
+    has_many :cells, Cell
 
     timestamps()
   end
