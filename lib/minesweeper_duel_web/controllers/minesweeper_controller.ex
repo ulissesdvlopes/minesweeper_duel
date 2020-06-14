@@ -1,7 +1,7 @@
 defmodule MinesweeperDuelWeb.MinesweeperController do
   use MinesweeperDuelWeb, :controller
 
-  alias MinesweeperDuel.Minesweeper
+  alias MinesweeperDuel.Mineswepper
   import Phoenix.LiveView.Controller
 
   def index(conn, _) do
@@ -11,14 +11,13 @@ defmodule MinesweeperDuelWeb.MinesweeperController do
   def create(conn, %{"host" => host}) do
     IO.puts "***host***"
     IO.inspect host
-    # result = Minesweeper.create_game(%{"host" => host})
-    # url = "/game/#{result.id}"
-    # redirect(conn, to: url)
-    redirect(conn, to: "/")
+    result = Mineswepper.create_game(%{"host" => host})
+    url = "/game-ms/#{result.id}"
+    redirect(conn, to: url)
   end
 
   def live(conn, %{"id" => id}) do
-    game = Minesweeper.get_game!(id)
+    game = Mineswepper.get_game!(id)
     live_render(conn, MinesweeperDuelWeb.PageLive, session: %{"game" => game})
   end
 end

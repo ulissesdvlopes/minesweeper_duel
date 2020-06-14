@@ -19,7 +19,7 @@ defmodule MinesweeperDuelWeb.Router do
 
     get "/", MinesweeperController, :index
     post "/game-ms", MinesweeperController, :create
-    live "/game-ms/:id", PageLive, :index
+    get "/game-ms/:id", MinesweeperController, :live
   end
 
   # Other scopes may use custom stacks.

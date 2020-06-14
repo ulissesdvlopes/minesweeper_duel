@@ -37,7 +37,10 @@ defmodule MinesweeperDuel.Mineswepper do
 
   """
   def get_game!(id) do 
+    query_cells = from c in Cell, order_by: c.row, order_by: c.col
+
     Repo.get!(Game, id)
+    |> Repo.preload(cells: query_cells)
   end
 
   defp sort_mines(map, turn \\ 0) do
@@ -52,9 +55,9 @@ defmodule MinesweeperDuel.Mineswepper do
     cell = Enum.random(0..15)
 
     if(!Map.has_key?(map, {row, cell})) do
-      sort(Map.put(map, {row, cell}, true), turn + 1)
+      sort_mines(Map.put(map, {row, cell}, true), turn + 1)
     else
-      sort(map, turn)
+      sort_mines(map, turn)
     end
   end
 
@@ -79,7 +82,7 @@ defmodule MinesweeperDuel.Mineswepper do
     mine_positions = sort_mines(%{})
 
     create_cell(game.id, mine_positions)
-    
+    game
   end
 
   @doc """
@@ -202,7 +205,7 @@ defmodule MinesweeperDuel.Mineswepper do
         col: col,
         mines_around: get_mines_around(mine_positions, row, col)
       })
-      |> Cell.insert()
+      |> Repo.insert()
 
     if(row < 15) do
       create_cell(game_id, mine_positions, row + 1, col)

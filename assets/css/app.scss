@@ -89,3 +89,22 @@
 .alert:empty {
   display: none;
 }
+
+#game-board {
+  display: grid;
+  grid-template-columns: repeat(16, 30px);
+  grid-template-rows: repeat(16, 30px);
+  justify-content: center;
+}
+
+.cell {
+  // display: inline-block;
+  // width: 30px;
+  // height: 30px;
+  font-size: 12px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9ffb9;
+  border: 3px outset #a6f0d1;
+}
