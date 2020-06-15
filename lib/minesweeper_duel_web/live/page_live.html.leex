@@ -2,7 +2,14 @@
   <h1>MineSweeper Duel</h1>
 </section>
 
-<h2>Host: <%= @game.host %></h2>
+<h2>
+  Host: <%= @game.host %>
+  Points: <%= @game.host_ponts %>
+</h2>
+<h2>
+  Guest: <%= @game.guest %>
+  Points: <%= @game.guest_points %>
+</h2>
 
 <div id="game-board">
   <%= for cell <- @game.cells do %>

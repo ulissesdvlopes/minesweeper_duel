@@ -1,0 +1,9 @@
+<h1>Minesweeper Duel</h1>
+
+<%= form_for @conn, Routes.minesweeper_path(@conn, :create_session, @conn.params["id"]), fn f -> %>
+  <label>
+    Your name
+    <%= text_input f, :guest %>
+  </label>
+  <%= submit "Start game" %>
+<% end %>

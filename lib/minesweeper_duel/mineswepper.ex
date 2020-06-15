@@ -36,7 +36,11 @@ defmodule MinesweeperDuel.Mineswepper do
       ** (Ecto.NoResultsError)
 
   """
-  def get_game!(id) do 
+  def get_game!(id) do
+    Repo.get!(Game, id)
+  end
+
+  def get_game_with_cells!(id) do
     query_cells = from c in Cell, order_by: c.row, order_by: c.col
 
     Repo.get!(Game, id)
@@ -74,11 +78,11 @@ defmodule MinesweeperDuel.Mineswepper do
 
   """
   def create_game(attrs \\ %{}) do
-    {:ok, game} = 
+    {:ok, game} =
       %Game{}
       |> Game.changeset(attrs)
       |> Repo.insert()
-    
+
     mine_positions = sort_mines(%{})
 
     create_cell(game.id, mine_positions)
@@ -101,6 +105,20 @@ defmodule MinesweeperDuel.Mineswepper do
     game
     |> Game.changeset(attrs)
     |> Repo.update()
+  end
+
+  def update_game!(%Game{} = game, attrs) do
+    game
+    |> Game.changeset(attrs)
+    |> Repo.update!()
+  end
+
+  def add_guest_to_game(game_id, guest) do
+    current_game = get_game!(game_id)
+    case current_game.guest do
+      nil -> update_game(current_game, %{"guest" => guest})
+      _ -> {:error, "You can't join this game"}
+    end
   end
 
   @doc """
@@ -201,7 +219,7 @@ defmodule MinesweeperDuel.Mineswepper do
       |> Cell.changeset(%{
         game_id: game_id,
         has_mine: Map.has_key?(mine_positions, {row, col}),
-        row: row, 
+        row: row,
         col: col,
         mines_around: get_mines_around(mine_positions, row, col)
       })
