@@ -4,11 +4,12 @@ defmodule MinesweeperDuel.Mineswepper.Game do
 
   alias MinesweeperDuel.Mineswepper.Cell
 
+  @primary_key {:id, :binary_id, autogenerate: true}
   schema "games" do
     field :guest, :string
     field :guest_points, :integer, default: 0
     field :host, :string
-    field :host_ponts, :integer, default: 0
+    field :host_points, :integer, default: 0
     field :turn, :string, default: "guest"
     has_many :cells, Cell
 
@@ -18,7 +19,7 @@ defmodule MinesweeperDuel.Mineswepper.Game do
   @doc false
   def changeset(game, attrs) do
     game
-    |> cast(attrs, [:host, :host_ponts, :guest, :guest_points, :turn])
-    |> validate_required([:host, :host_ponts, :guest_points, :turn])
+    |> cast(attrs, [:host, :host_points, :guest, :guest_points, :turn])
+    |> validate_required([:host, :host_points, :guest_points, :turn])
   end
 end

@@ -213,8 +213,8 @@ defmodule MinesweeperDuel.Mineswepper do
       {:error, %Ecto.Changeset{}}
 
   """
-  defp create_cell(game_id, mine_positions, row \\ 0, col \\ 0) do
-    {:ok, cell} =
+  def create_cell(game_id, mine_positions, row \\ 0, col \\ 0) do
+    {:ok, _cell} =
       %Cell{}
       |> Cell.changeset(%{
         game_id: game_id,

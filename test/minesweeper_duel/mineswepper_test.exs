@@ -6,9 +6,9 @@ defmodule MinesweeperDuel.MineswepperTest do
   describe "games" do
     alias MinesweeperDuel.Mineswepper.Game
 
-    @valid_attrs %{guest: "some guest", guest_points: 42, host: "some host", host_ponts: 42, turn: "some turn"}
-    @update_attrs %{guest: "some updated guest", guest_points: 43, host: "some updated host", host_ponts: 43, turn: "some updated turn"}
-    @invalid_attrs %{guest: nil, guest_points: nil, host: nil, host_ponts: nil, turn: nil}
+    @valid_attrs %{guest: "some guest", guest_points: 42, host: "some host", host_points: 42, turn: "some turn"}
+    @update_attrs %{guest: "some updated guest", guest_points: 43, host: "some updated host", host_points: 43, turn: "some updated turn"}
+    @invalid_attrs %{guest: nil, guest_points: nil, host: nil, host_points: nil, turn: nil}
 
     def game_fixture(attrs \\ %{}) do
       {:ok, game} =
@@ -34,7 +34,7 @@ defmodule MinesweeperDuel.MineswepperTest do
       assert game.guest == "some guest"
       assert game.guest_points == 42
       assert game.host == "some host"
-      assert game.host_ponts == 42
+      assert game.host_points == 42
       assert game.turn == "some turn"
     end
 
@@ -48,7 +48,7 @@ defmodule MinesweeperDuel.MineswepperTest do
       assert game.guest == "some updated guest"
       assert game.guest_points == 43
       assert game.host == "some updated host"
-      assert game.host_ponts == 43
+      assert game.host_points == 43
       assert game.turn == "some updated turn"
     end
 
