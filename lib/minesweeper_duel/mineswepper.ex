@@ -201,6 +201,36 @@ defmodule MinesweeperDuel.Mineswepper do
     end)
   end
 
+  def reveal_cell(game_id, user, row, col, original_click \\ true) do
+    query =
+      from c in Cell,
+        where: c.col == ^col and c.row == ^row and c.game_id == ^game_id,
+        select: c
+
+    result = Repo.one(query)
+
+    case result do
+      %{has_mine: true} ->
+        # increment user points
+        IO.puts("ACERTOUUUU!")
+        IO.puts user
+
+      %{mines_around: 0} ->
+        # reveal cell for each adjacent
+        adjacents = get_adjacents(row, col)
+        IO.puts("ABRINDO ADJACENTES")
+        IO.inspect adjacents
+
+      _ ->
+        IO.puts("TEM #{result.mines_around} MINAS EM VOLTA")
+    end
+
+    if original_click && !result.has_mine do
+      IO.puts "SHIFTING TURNS"
+    end
+    result
+  end
+
   @doc """
   Creates a cell.
 
