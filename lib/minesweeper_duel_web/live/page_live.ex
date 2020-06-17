@@ -2,9 +2,12 @@ defmodule MinesweeperDuelWeb.PageLive do
   use MinesweeperDuelWeb, :live_view
 
   alias MinesweeperDuel.Mineswepper
+  alias MinesweeperDuelWeb.Endpoint
 
   @impl true
   def mount(_params, %{"game" => game, "user" => user}, socket) do
+    IO.puts "******mount******"
+    Endpoint.subscribe("update")
     role = get_user_role(user, game)
     {:ok, assign(socket, game: game, user: role)}
   end
@@ -48,10 +51,18 @@ defmodule MinesweeperDuelWeb.PageLive do
     row = String.to_integer(params["row"])
     col = String.to_integer(params["col"])
 
-    _result = Mineswepper.reveal_cell(game_id, user, row, col)
+    result = Mineswepper.reveal_cell(game_id, user, row, col)
+    Endpoint.broadcast_from(self(), "update", "reveal", result)
     # IO.puts("*result*")
     # IO.inspect(result)
     # IO.puts("*result*")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(%{topic: "update", payload: result}, socket) do
+    IO.puts "Received message..."
+    IO.inspect result
     {:noreply, socket}
   end
 
