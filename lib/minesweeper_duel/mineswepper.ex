@@ -201,34 +201,61 @@ defmodule MinesweeperDuel.Mineswepper do
     end)
   end
 
-  def reveal_cell(game_id, user, row, col, original_click \\ true) do
+  def open(game_id, user, row, col, original_click \\ true) do
     query =
       from c in Cell,
         where: c.col == ^col and c.row == ^row and c.game_id == ^game_id,
-        select: c
+        select: c.revealed
+    revealed = Repo.one(query)
+    case revealed do
+      true -> nil
+      false ->
+        reveal_cell(game_id, user, row, col)
+    end
+    if original_click, do: get_game_with_cells!(game_id)
+  end
 
-    result = Repo.one(query)
+  def reveal_cell(game_id, user, row, col) do
+    query =
+      from c in Cell,
+        where: c.col == ^col and c.row == ^row and c.game_id == ^game_id,
+        update: [set: [revealed: true, revealed_by: ^user]],
+        select: map(c, [:has_mine, :mines_around])
+
+    {_n, list} = Repo.update_all(query, [])
+
+    [result | _] = list
+
+    IO.puts("****result!****")
+    IO.inspect result
 
     case result do
       %{has_mine: true} ->
         # increment user points
         IO.puts("ACERTOUUUU!")
         IO.puts user
+        query_game =
+          from g in Game,
+            where: g.id == ^game_id,
+            update: [inc: [host_points: 1]]
+        Repo.update_all(query_game, [])
 
       %{mines_around: 0} ->
         # reveal cell for each adjacent
         adjacents = get_adjacents(row, col)
         IO.puts("ABRINDO ADJACENTES")
         IO.inspect adjacents
-
+        Enum.each(adjacents, fn {row, col} ->
+          open(game_id, user, row, col, false)
+        end)
       _ ->
         IO.puts("TEM #{result.mines_around} MINAS EM VOLTA")
     end
 
-    if original_click && !result.has_mine do
-      IO.puts "SHIFTING TURNS"
-    end
-    result
+    # if original_click && !result.has_mine do
+    #   IO.puts "SHIFTING TURNS"
+    # end
+    # if original_click, do: get_game_with_cells!(game_id)
   end
 
   @doc """

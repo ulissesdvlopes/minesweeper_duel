@@ -25,8 +25,12 @@ defmodule MinesweeperDuelWeb.PageLive do
     ""
   end
 
-  def render_cell(%{has_mine: has_mine}) when has_mine == true do
-    "💣"
+  def render_cell(%{has_mine: has_mine, revealed_by: revealed_by}) when has_mine == true do
+    case revealed_by do
+      "host" -> content_tag :span, "🏳️", class: "flag"
+      "guest" -> content_tag :span, "🚩"
+      _ -> content_tag :span, "💣"
+    end
   end
 
   def render_cell(%{mines_around: mines_around}) when mines_around != 0 do
@@ -37,12 +41,12 @@ defmodule MinesweeperDuelWeb.PageLive do
     ""
   end
 
-  # @impl true
-  # def handle_event("open_cell", %{"revealed" => "true"}, socket) do
-  #   IO.puts("*****open_cell*****")
-  #   IO.puts("revealed false")
-  #   {:noreply, socket}
-  # end
+  @impl true
+  def handle_event("open_cell", %{"revealed" => "true"}, socket) do
+    IO.puts("*****open_cell*****")
+    IO.puts("revealed false")
+    {:noreply, socket}
+  end
 
   @impl true
   def handle_event("open_cell", params, socket) do
@@ -51,8 +55,8 @@ defmodule MinesweeperDuelWeb.PageLive do
     row = String.to_integer(params["row"])
     col = String.to_integer(params["col"])
 
-    result = Mineswepper.reveal_cell(game_id, user, row, col)
-    Endpoint.broadcast_from(self(), "update", "reveal", result)
+    result = Mineswepper.open(game_id, user, row, col)
+    # Endpoint.broadcast_from(self(), "update", "reveal", result)
     # IO.puts("*result*")
     # IO.inspect(result)
     # IO.puts("*result*")

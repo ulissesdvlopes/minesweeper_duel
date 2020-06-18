@@ -107,4 +107,14 @@
   align-items: center;
   background-color: #f9ffb9;
   border: 3px outset #a6f0d1;
+  font-weight: 600;
+}
+
+.flag {
+  color: transparent;
+  text-shadow: 0 0 0 blue;
+}
+
+.flag-guest {
+  text-shadow: 0 0 0 red;
 }
