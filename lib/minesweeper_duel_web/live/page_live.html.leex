@@ -5,10 +5,12 @@
 <h2>
   Host: <%= @game.host %>
   Points: <%= @game.host_points %>
+  <%= if @game.turn == "host", do: "Sua vez" %>
 </h2>
 <h2>
   Guest: <%= @game.guest %>
   Points: <%= @game.guest_points %>
+  <%= if @game.turn == "guest", do: "Sua vez" %>
 </h2>
 
 <div id="game-board">

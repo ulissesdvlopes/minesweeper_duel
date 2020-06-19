@@ -210,7 +210,31 @@ defmodule MinesweeperDuel.Mineswepper do
     case revealed do
       true -> nil
       false ->
-        reveal_cell(game_id, user, row, col)
+        result = reveal_cell(game_id, user, row, col)
+        case result do
+          %{has_mine: true} ->
+            # increment user points
+            query_game =
+              from g in Game,
+                where: g.id == ^game_id
+            if user == "host", do: Repo.update_all(query_game, inc: [host_points: 1])
+            if user == "guest", do: Repo.update_all(query_game, inc: [guest_points: 1])
+          %{mines_around: 0} ->
+            # reveal cell for each adjacent
+            adjacents = get_adjacents(row, col)
+            Enum.each(adjacents, fn {row, col} ->
+              open(game_id, user, row, col, false)
+            end)
+          _ -> nil
+        end
+        if original_click && !result.has_mine do
+          IO.puts "SHIFTING TURNS"
+          query_game =
+            from g in Game,
+              where: g.id == ^game_id
+          if user == "host", do: Repo.update_all(query_game, set: [turn: "guest"])
+          if user == "guest", do: Repo.update_all(query_game, set: [turn: "host"])
+        end
     end
     if original_click, do: get_game_with_cells!(game_id)
   end
@@ -225,37 +249,7 @@ defmodule MinesweeperDuel.Mineswepper do
     {_n, list} = Repo.update_all(query, [])
 
     [result | _] = list
-
-    IO.puts("****result!****")
-    IO.inspect result
-
-    case result do
-      %{has_mine: true} ->
-        # increment user points
-        IO.puts("ACERTOUUUU!")
-        IO.puts user
-        query_game =
-          from g in Game,
-            where: g.id == ^game_id,
-            update: [inc: [host_points: 1]]
-        Repo.update_all(query_game, [])
-
-      %{mines_around: 0} ->
-        # reveal cell for each adjacent
-        adjacents = get_adjacents(row, col)
-        IO.puts("ABRINDO ADJACENTES")
-        IO.inspect adjacents
-        Enum.each(adjacents, fn {row, col} ->
-          open(game_id, user, row, col, false)
-        end)
-      _ ->
-        IO.puts("TEM #{result.mines_around} MINAS EM VOLTA")
-    end
-
-    # if original_click && !result.has_mine do
-    #   IO.puts "SHIFTING TURNS"
-    # end
-    # if original_click, do: get_game_with_cells!(game_id)
+    result
   end
 
   @doc """

@@ -105,9 +105,16 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  background-color: #f9ffb9;
-  border: 3px outset #a6f0d1;
+  background-color: #a6f0d1;
+  border: 3px outset #ffdcbf;
   font-weight: 600;
+}
+
+.empty-cell {
+  background-color: #f9ffb9;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
 }
 
 .flag {

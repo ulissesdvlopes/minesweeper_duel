@@ -38,7 +38,7 @@ defmodule MinesweeperDuelWeb.PageLive do
   end
 
   def render_cell(_) do
-    ""
+    content_tag :span, "", class: "empty-cell"
   end
 
   @impl true
@@ -50,24 +50,28 @@ defmodule MinesweeperDuelWeb.PageLive do
 
   @impl true
   def handle_event("open_cell", params, socket) do
-    game_id = socket.assigns.game.id
-    user = params["user"]
-    row = String.to_integer(params["row"])
-    col = String.to_integer(params["col"])
-
-    result = Mineswepper.open(game_id, user, row, col)
-    # Endpoint.broadcast_from(self(), "update", "reveal", result)
-    # IO.puts("*result*")
-    # IO.inspect(result)
-    # IO.puts("*result*")
-    {:noreply, socket}
+    # game_id = socket.assigns.game.id
+    # user = params["user"]
+    # row = String.to_integer(params["row"])
+    # col = String.to_integer(params["col"])
+    %{id: game_id, turn: turn} = socket.assigns.game
+    %{"user" => user, "row" => row_string, "col" => col_string} = params
+    cond do
+      turn == user ->
+        row = String.to_integer(row_string)
+        col = String.to_integer(col_string)
+        result = Mineswepper.open(game_id, user, row, col)
+        Endpoint.broadcast_from(self(), "update", "reveal", result)
+        {:noreply, assign(socket, game: result)}
+      true -> {:noreply, socket}
+    end
   end
 
   @impl true
   def handle_info(%{topic: "update", payload: result}, socket) do
     IO.puts "Received message..."
     IO.inspect result
-    {:noreply, socket}
+    {:noreply, assign(socket, game: result)}
   end
 
 end
