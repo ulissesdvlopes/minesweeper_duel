@@ -13,6 +13,10 @@
   <%= if @game.turn == "guest", do: "Sua vez" %>
 </h2>
 
+<div>
+  <%= if @game.over, do: "FIM DE JOGO" %>
+<div>
+
 <div id="game-board">
   <%= for cell <- @game.cells do %>
     <span
@@ -21,6 +25,7 @@
       phx-value-revealed="<%= cell.revealed %>"
       phx-value-row="<%= cell.row %>"
       phx-value-user="<%= @user %>"
+      phx-value-has_mine="<%= cell.has_mine %>"
       class="cell" id="<%= cell.id %>"
     >
       <%= render_cell(cell) %>

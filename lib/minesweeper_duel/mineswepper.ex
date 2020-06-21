@@ -239,6 +239,17 @@ defmodule MinesweeperDuel.Mineswepper do
     if original_click, do: get_game_with_cells!(game_id)
   end
 
+  def last_move(game_id, user, row, col) do
+    reveal_cell(game_id, user, row, col)
+    query_game =
+      from g in Game,
+        where: g.id == ^game_id,
+        update: [set: [over: true, winner: ^user]]
+    if user == "host", do: Repo.update_all(query_game, inc: [host_points: 1])
+    if user == "guest", do: Repo.update_all(query_game, inc: [guest_points: 1])
+    get_game_with_cells!(game_id)
+  end
+
   def reveal_cell(game_id, user, row, col) do
     query =
       from c in Cell,

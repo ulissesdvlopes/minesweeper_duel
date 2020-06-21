@@ -9,6 +9,8 @@ defmodule MinesweeperDuel.Repo.Migrations.CreateGames do
       add :guest, :string
       add :guest_points, :integer
       add :turn, :string
+      add :over, :boolean, default: false, null: false
+      add :winner, :string
 
       timestamps()
     end

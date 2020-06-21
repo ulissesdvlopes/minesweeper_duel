@@ -50,16 +50,22 @@ defmodule MinesweeperDuelWeb.PageLive do
 
   @impl true
   def handle_event("open_cell", params, socket) do
-    # game_id = socket.assigns.game.id
-    # user = params["user"]
-    # row = String.to_integer(params["row"])
-    # col = String.to_integer(params["col"])
-    %{id: game_id, turn: turn} = socket.assigns.game
-    %{"user" => user, "row" => row_string, "col" => col_string} = params
+    %{id: game_id, turn: turn, host_points: host_points, guest_points: guest_points, over: over} = socket.assigns.game
+    %{"user" => user, "row" => row_string, "col" => col_string, "has_mine" => has_mine} = params
+    is_my_turn = turn == user
+    last_move = is_my_turn &&
+      ((user == "host" && host_points == 25) || (user == "guest" && guest_points == 25)) &&
+      has_mine == "true"
+    row = String.to_integer(row_string)
+    col = String.to_integer(col_string)
     cond do
-      turn == user ->
-        row = String.to_integer(row_string)
-        col = String.to_integer(col_string)
+      over -> {:noreply, socket}
+      last_move ->
+        IO.puts "*******  LAST MOVE  *******"
+        result = Mineswepper.last_move(game_id, user, row, col)
+        Endpoint.broadcast_from(self(), "update", "reveal", result)
+        {:noreply, assign(socket, game: result)}
+      is_my_turn ->
         result = Mineswepper.open(game_id, user, row, col)
         Endpoint.broadcast_from(self(), "update", "reveal", result)
         {:noreply, assign(socket, game: result)}
